@@ -18,27 +18,29 @@ namespace NZWalks.Api.Controllers
             _dbContext = dbContext;
         }
 
-
+        
         [HttpGet]
         public IActionResult GetAllRegions()
         {
             var regions = _dbContext.Regions.ToList();
-            Console.WriteLine(Guid.NewGuid());
-            var regionDTO = new List<RegionDTO>();
+            var regionsDto = new List<RegionDTO>();
+        
             foreach (var region in regions)
             {
-                regionDTO.Add(new RegionDTO()
+                regionsDto.Add(new RegionDTO()
                 {
                     Id = region.Id,
                     Name = region.Name,
                     Code = region.Code,
-                    RegionImageUrl = region.RegionImageUrl
+                    RegionImageUrl = region.RegionImageUrl,
                 });
             }
-
-            return Ok(regionDTO);
+        
+            return Ok(regionsDto);
         }
 
+        
+        
         [HttpGet]
         [Route("{id:guid}")]
         public IActionResult GetRegionById([FromRoute] Guid id)
@@ -56,8 +58,31 @@ namespace NZWalks.Api.Controllers
                 Code = region.Code,
                 RegionImageUrl = region.RegionImageUrl
             };
-
             return Ok(regionDTO);
+        }
+
+
+        [HttpPost]
+        public IActionResult CreateRegion([FromBody] CreateRegionRequestDto createRegionRequestDto)
+        {
+            var region = new Region()
+            {
+                Name = createRegionRequestDto.Name,
+                Code = createRegionRequestDto.Code,
+                RegionImageUrl = createRegionRequestDto.RegionImageUrl
+            };
+            _dbContext.Regions.Add(region);
+            _dbContext.SaveChanges();
+
+            var regionDto = new RegionDTO()
+            {
+                Id = region.Id,
+                Name = region.Name,
+                Code = region.Code,
+                RegionImageUrl = region.RegionImageUrl
+            };
+
+            return CreatedAtAction(nameof(GetRegionById), new { id = regionDto.Id }, regionDto);
         }
     }
 }
