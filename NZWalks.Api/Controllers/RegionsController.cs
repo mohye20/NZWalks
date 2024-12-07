@@ -18,13 +18,13 @@ namespace NZWalks.Api.Controllers
             _dbContext = dbContext;
         }
 
-        
+
         [HttpGet]
         public IActionResult GetAllRegions()
         {
             var regions = _dbContext.Regions.ToList();
             var regionsDto = new List<RegionDTO>();
-        
+
             foreach (var region in regions)
             {
                 regionsDto.Add(new RegionDTO()
@@ -35,12 +35,11 @@ namespace NZWalks.Api.Controllers
                     RegionImageUrl = region.RegionImageUrl,
                 });
             }
-        
+
             return Ok(regionsDto);
         }
 
-        
-        
+
         [HttpGet]
         [Route("{id:guid}")]
         public IActionResult GetRegionById([FromRoute] Guid id)
@@ -83,6 +82,33 @@ namespace NZWalks.Api.Controllers
             };
 
             return CreatedAtAction(nameof(GetRegionById), new { id = regionDto.Id }, regionDto);
+        }
+
+
+        [HttpPut]
+        [Route("{id:guid}")]
+        public IActionResult UpdateRegion(Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
+        {
+            var region = _dbContext.Regions.Find(id);
+            if (region is null)
+            {
+                return NotFound();
+            }
+
+            region.Name = updateRegionRequestDto.Name;
+            region.Code = updateRegionRequestDto.Code;
+            region.RegionImageUrl = updateRegionRequestDto.RegionImageUrl;
+            _dbContext.SaveChanges();
+
+            var regionDto = new RegionDTO()
+            {
+                Id = region.Id,
+                Name = region.Name,
+                Code = region.Code,
+                RegionImageUrl = region.RegionImageUrl
+            };
+
+            return Ok(regionDto);
         }
     }
 }
