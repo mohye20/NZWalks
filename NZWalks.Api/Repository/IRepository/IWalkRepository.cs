@@ -1,0 +1,8 @@
+using NZWalks.Api.Models.Domain;
+
+namespace NZWalks.Api.Repository;
+
+public interface IWalkRepository
+{
+    Task<Walk> CreateAsync(Walk walk);
+}
