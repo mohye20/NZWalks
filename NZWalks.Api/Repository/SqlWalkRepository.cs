@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using NZWalks.Api.Data;
 using NZWalks.Api.Models.Domain;
 
@@ -17,5 +18,10 @@ public class SqlWalkRepository : IWalkRepository
         await _dbContext.Walks.AddAsync(walk);
         await _dbContext.SaveChangesAsync();
         return walk;
+    }
+
+    public async Task<List<Walk>> GetAllAsync()
+    {
+        return await _dbContext.Walks.ToListAsync();
     }
 }
