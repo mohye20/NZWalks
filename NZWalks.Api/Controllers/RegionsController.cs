@@ -16,7 +16,7 @@ namespace NZWalks.Api.Controllers
         private readonly NZWalksDbContext _dbContext;
         private readonly IRegionRepository _regionRepository;
 
-        public RegionsController(NZWalksDbContext dbContext , IRegionRepository regionRepository)
+        public RegionsController(NZWalksDbContext dbContext, IRegionRepository regionRepository)
         {
             _dbContext = dbContext;
             _regionRepository = regionRepository;
@@ -48,7 +48,7 @@ namespace NZWalks.Api.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> GetRegionById([FromRoute] Guid id)
         {
-            var region =await _dbContext.Regions.FindAsync(id);
+            var region = await _regionRepository.GetByIdAsync(id);
             if (region is null)
             {
                 return NotFound();
@@ -74,8 +74,9 @@ namespace NZWalks.Api.Controllers
                 Code = createRegionRequestDto.Code,
                 RegionImageUrl = createRegionRequestDto.RegionImageUrl
             };
-            _dbContext.Regions.Add(region);
-            _dbContext.SaveChanges();
+
+            await _regionRepository.CreateAsync(region);
+
 
             var regionDto = new RegionDTO()
             {
@@ -93,16 +94,18 @@ namespace NZWalks.Api.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateRegion(Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
         {
-            var region =await _dbContext.Regions.FindAsync(id);
+            var regionDominModel = new Region()
+            {
+                Name = updateRegionRequestDto.Name,
+                Code = updateRegionRequestDto.Code,
+                RegionImageUrl = updateRegionRequestDto.RegionImageUrl
+            };
+            var region = await _regionRepository.UpdateAsync(id, regionDominModel);
             if (region is null)
             {
                 return NotFound();
             }
 
-            region.Name = updateRegionRequestDto.Name;
-            region.Code = updateRegionRequestDto.Code;
-            region.RegionImageUrl = updateRegionRequestDto.RegionImageUrl;
-            await _dbContext.SaveChangesAsync();
 
             var regionDto = new RegionDTO()
             {
@@ -119,14 +122,12 @@ namespace NZWalks.Api.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> DeleteRegion([FromRoute] Guid id)
         {
-            var region =await _dbContext.Regions.FindAsync(id);
+            var region =await _regionRepository.DeleteAsync(id);
             if (region is null)
             {
                 return NotFound();
             }
 
-            _dbContext.Regions.Remove(region);
-            _dbContext.SaveChangesAsync();
 
             return Ok("Region deleted Done");
         }
