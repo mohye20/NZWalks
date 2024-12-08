@@ -14,7 +14,7 @@ namespace NZWalks.Api.Controllers
         private readonly IMapper _mapper;
         private readonly IWalkRepository _walkRepository;
 
-        public WalkController(IMapper mapper , IWalkRepository walkRepository)
+        public WalkController(IMapper mapper, IWalkRepository walkRepository)
         {
             _mapper = mapper;
             _walkRepository = walkRepository;
@@ -25,20 +25,33 @@ namespace NZWalks.Api.Controllers
         {
             Walk walkDomainModel = _mapper.Map<Walk>(walkCreateRequestDto);
             var walk = await _walkRepository.CreateAsync(walkDomainModel);
-            
-            
+
+
             return Ok(_mapper.Map<WalkDto>(walk));
         }
 
 
         [HttpGet]
-
         public async Task<IActionResult> GetAll()
         {
             List<Walk> walksDomainModel = await _walkRepository.GetAllAsync();
             var walksDto = _mapper.Map<List<WalkDto>>(walksDomainModel);
             return Ok(walksDto);
+        }
 
+
+        [HttpGet]
+        [Route("{id:guid}")]
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
+        {
+            var walkDomainModel = await _walkRepository.GetByIdAsync(id);
+
+            if (walkDomainModel is null)
+            {
+                return NotFound("No walk found");
+            }
+
+            return Ok(_mapper.Map<WalkDto>(walkDomainModel));
         }
     }
 }

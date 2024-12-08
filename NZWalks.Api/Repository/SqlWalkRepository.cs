@@ -24,4 +24,9 @@ public class SqlWalkRepository : IWalkRepository
     {
         return await _dbContext.Walks.Include(x => x.Diffculty).Include(x => x.Region).ToListAsync();
     }
+
+    public async Task<Walk?> GetByIdAsync(Guid id)
+    {
+        return await _dbContext.Walks.Include(x => x.Region).Include(x => x.Diffculty).FirstOrDefaultAsync(x => x.Id == id);
+    }
 }
