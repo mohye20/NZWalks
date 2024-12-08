@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Mvc;
@@ -13,13 +14,13 @@ namespace NZWalks.Api.Controllers
     [ApiController]
     public class RegionsController : ControllerBase
     {
-        private readonly NZWalksDbContext _dbContext;
         private readonly IRegionRepository _regionRepository;
+        private readonly IMapper _mapper;
 
-        public RegionsController(NZWalksDbContext dbContext, IRegionRepository regionRepository)
+        public RegionsController(IRegionRepository regionRepository, IMapper mapper)
         {
-            _dbContext = dbContext;
             _regionRepository = regionRepository;
+            _mapper = mapper;
         }
 
 
@@ -27,20 +28,9 @@ namespace NZWalks.Api.Controllers
         public async Task<IActionResult> GetAllRegions()
         {
             var regions = await _regionRepository.GetAllAsync();
-            var regionsDto = new List<RegionDTO>();
 
-            foreach (var region in regions)
-            {
-                regionsDto.Add(new RegionDTO()
-                {
-                    Id = region.Id,
-                    Name = region.Name,
-                    Code = region.Code,
-                    RegionImageUrl = region.RegionImageUrl,
-                });
-            }
 
-            return Ok(regionsDto);
+            return Ok(_mapper.Map<List<RegionDTO>>(regions));
         }
 
 
@@ -54,37 +44,20 @@ namespace NZWalks.Api.Controllers
                 return NotFound();
             }
 
-            var regionDTO = new RegionDTO()
-            {
-                Id = region.Id,
-                Name = region.Name,
-                Code = region.Code,
-                RegionImageUrl = region.RegionImageUrl
-            };
-            return Ok(regionDTO);
+
+            return Ok(_mapper.Map<RegionDTO>(region));
         }
 
 
         [HttpPost]
         public async Task<IActionResult> CreateRegion([FromBody] CreateRegionRequestDto createRegionRequestDto)
         {
-            var region = new Region()
-            {
-                Name = createRegionRequestDto.Name,
-                Code = createRegionRequestDto.Code,
-                RegionImageUrl = createRegionRequestDto.RegionImageUrl
-            };
+            var region = _mapper.Map<Region>(createRegionRequestDto);
 
             await _regionRepository.CreateAsync(region);
 
 
-            var regionDto = new RegionDTO()
-            {
-                Id = region.Id,
-                Name = region.Name,
-                Code = region.Code,
-                RegionImageUrl = region.RegionImageUrl
-            };
+            var regionDto = _mapper.Map<RegionDTO>(region);
 
             return CreatedAtAction(nameof(GetRegionById), new { id = regionDto.Id }, regionDto);
         }
@@ -94,12 +67,7 @@ namespace NZWalks.Api.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateRegion(Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
         {
-            var regionDominModel = new Region()
-            {
-                Name = updateRegionRequestDto.Name,
-                Code = updateRegionRequestDto.Code,
-                RegionImageUrl = updateRegionRequestDto.RegionImageUrl
-            };
+            var regionDominModel =  _mapper.Map<Region>(updateRegionRequestDto);
             var region = await _regionRepository.UpdateAsync(id, regionDominModel);
             if (region is null)
             {
@@ -107,13 +75,7 @@ namespace NZWalks.Api.Controllers
             }
 
 
-            var regionDto = new RegionDTO()
-            {
-                Id = region.Id,
-                Name = region.Name,
-                Code = region.Code,
-                RegionImageUrl = region.RegionImageUrl
-            };
+            var regionDto = _mapper.Map<RegionDTO>(region);
 
             return Ok(regionDto);
         }
@@ -122,7 +84,7 @@ namespace NZWalks.Api.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> DeleteRegion([FromRoute] Guid id)
         {
-            var region =await _regionRepository.DeleteAsync(id);
+            var region = await _regionRepository.DeleteAsync(id);
             if (region is null)
             {
                 return NotFound();
