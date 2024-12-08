@@ -15,5 +15,6 @@ public class MappingConfig  : Profile
         CreateMap<Walk,WalkDto>().ReverseMap();
         CreateMap<Region, RegionDTO>().ReverseMap();
         CreateMap<Diffculty, DiffcultyDto>().ReverseMap();
+        CreateMap<UpdateWalkRequestDto, Walk>().ReverseMap();
     }
 }

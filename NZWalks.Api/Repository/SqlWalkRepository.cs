@@ -27,6 +27,28 @@ public class SqlWalkRepository : IWalkRepository
 
     public async Task<Walk?> GetByIdAsync(Guid id)
     {
-        return await _dbContext.Walks.Include(x => x.Region).Include(x => x.Diffculty).FirstOrDefaultAsync(x => x.Id == id);
+        return await _dbContext.Walks.Include(x => x.Region).Include(x => x.Diffculty)
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public async Task<Walk?> UpdateAsync(Guid id, Walk walk)
+    {
+        var walkDomainModel = await _dbContext.Walks.Include(x=>x.Diffculty).Include(x=>x.Region).FirstOrDefaultAsync(x => x.Id == id);
+
+        if (walkDomainModel is null)
+        {
+            return null;
+        }
+
+        walkDomainModel.Name = walk.Name;
+        walkDomainModel.LengthInKM = walk.LengthInKM;
+        walkDomainModel.ImageUrl = walk.ImageUrl;
+        walkDomainModel.Description = walk.Description;
+        walkDomainModel.RegionId = walk.RegionId;
+        walkDomainModel.DiffcultyId = walk.DiffcultyId;
+
+        await _dbContext.SaveChangesAsync();
+        
+        return walkDomainModel;
     }
 }
