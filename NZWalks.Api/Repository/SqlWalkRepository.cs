@@ -12,7 +12,7 @@ public class SqlWalkRepository : IWalkRepository
     {
         _dbContext = dbContext;
     }
-    
+
     public async Task<Walk> CreateAsync(Walk walk)
     {
         await _dbContext.Walks.AddAsync(walk);
@@ -22,6 +22,6 @@ public class SqlWalkRepository : IWalkRepository
 
     public async Task<List<Walk>> GetAllAsync()
     {
-        return await _dbContext.Walks.ToListAsync();
+        return await _dbContext.Walks.Include(x => x.Diffculty).Include(x => x.Region).ToListAsync();
     }
 }
