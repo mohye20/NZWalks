@@ -52,6 +52,11 @@ namespace NZWalks.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateRegion([FromBody] CreateRegionRequestDto createRegionRequestDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var region = _mapper.Map<Region>(createRegionRequestDto);
 
             await _regionRepository.CreateAsync(region);
@@ -67,7 +72,12 @@ namespace NZWalks.Api.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateRegion(Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
         {
-            var regionDominModel =  _mapper.Map<Region>(updateRegionRequestDto);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var regionDominModel = _mapper.Map<Region>(updateRegionRequestDto);
             var region = await _regionRepository.UpdateAsync(id, regionDominModel);
             if (region is null)
             {

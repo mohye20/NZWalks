@@ -8,7 +8,7 @@ public class Walk
 
     public string Description { get; set; }
 
-    public string LengthInKM { get; set; }
+    public double LengthInKM { get; set; }
 
     public string? ImageUrl { get; set; }
 
