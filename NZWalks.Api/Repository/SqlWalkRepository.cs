@@ -20,9 +20,19 @@ public class SqlWalkRepository : IWalkRepository
         return walk;
     }
 
-    public async Task<List<Walk>> GetAllAsync()
+    public async Task<List<Walk>> GetAllAsync(string? filterOn = null, string? filterQuery = null)
     {
-        return await _dbContext.Walks.Include(x => x.Diffculty).Include(x => x.Region).ToListAsync();
+        var walks = _dbContext.Walks.Include(x => x.Diffculty).Include(x => x.Region).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filterOn) || !string.IsNullOrWhiteSpace(filterQuery))
+        {
+            if (filterOn != null && filterOn.Equals("Name", StringComparison.OrdinalIgnoreCase))
+            {
+                walks = walks.Where(x => x.Name.Contains(filterQuery));
+            }
+        }
+
+        return await walks.ToListAsync();
     }
 
     public async Task<Walk?> GetByIdAsync(Guid id)
@@ -33,7 +43,8 @@ public class SqlWalkRepository : IWalkRepository
 
     public async Task<Walk?> UpdateAsync(Guid id, Walk walk)
     {
-        var walkDomainModel = await _dbContext.Walks.Include(x=>x.Diffculty).Include(x=>x.Region).FirstOrDefaultAsync(x => x.Id == id);
+        var walkDomainModel = await _dbContext.Walks.Include(x => x.Diffculty).Include(x => x.Region)
+            .FirstOrDefaultAsync(x => x.Id == id);
 
         if (walkDomainModel is null)
         {
@@ -48,7 +59,7 @@ public class SqlWalkRepository : IWalkRepository
         walkDomainModel.DiffcultyId = walk.DiffcultyId;
 
         await _dbContext.SaveChangesAsync();
-        
+
         return walkDomainModel;
     }
 
@@ -59,7 +70,7 @@ public class SqlWalkRepository : IWalkRepository
         {
             return null;
         }
-        
+
         _dbContext.Walks.Remove(existingWalk);
         await _dbContext.SaveChangesAsync();
         return existingWalk;
