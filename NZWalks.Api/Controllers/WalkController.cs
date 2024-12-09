@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using NZWalks.Api.Models.Domain;
 using NZWalks.Api.Models.DTO;
 using NZWalks.Api.Repository;
@@ -68,7 +69,19 @@ namespace NZWalks.Api.Controllers
             }
 
             return Ok(_mapper.Map<WalkDto>(walkDomainModel));
+        }
 
+        [HttpDelete]
+        [Route("{id:guid}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            Walk walkDomainModel = await _walkRepository.DeleteAsync(id);
+            if (walkDomainModel is null)
+            {
+                return NotFound("Walk Not Found");
+            }
+
+            return Ok(_mapper.Map<WalkDto>(walkDomainModel));
         }
     }
 }
